@@ -90,31 +90,93 @@ X_0(1200) g=205  -> 25,49,52,97,103
 
 Every quotient genus ≥ 56 ({57,61,77,81,97,103}) is already realized.
 
-## 4. Bottom line
+## 4. IMPORTANT CORRECTION — §2/§3 only cover quotients *inside* `GL2(Ẑ)`
 
-Within the scope of this pipeline — census curves of level `< 240`, plus
-`X_0(N)` for the 86 good levels `N ≤ 1200`, quotiented by their **modular**
-(diamond / Atkin–Lehner) automorphisms — **no new Ekedahl–Serre genus is
-found, and Part A is mathematically guaranteed to find none.**
+The "Part A is provably empty" statement above is correct **only for the
+quotients `harvest.m` actually computes**: those coming from the normalizer of
+`H` *inside* `GL2(ℤ/Nℤ)` (diamond operators and `GL2`-internal automorphisms).
+It does **NOT** cover **Atkin–Lehner / Fricke** involutions, and that is exactly
+the gap Remark 2 of the paper points at.
 
-### Where new genera could still come from (honest forward directions)
+Why the census-closure argument fails for Atkin–Lehner: AL/Fricke matrices
+(e.g. `(0,-1;N,0)`) have determinant `N`, not a unit — **they do not live in
+`GL2(Ẑ)`**. So `X_H/⟨w⟩` is the modular curve for `⟨H, w⟩`, which is *not a
+subgroup of `GL2(Ẑ)`*, hence *not* in the census, hence its genus *can* be new.
+The Ekedahl–Serre genus 47 = `X_0(600)/w_24` is precisely this kind.
 
-The census-closure argument in §2 only kills *modular* quotients. Genuinely
-open avenues, none of which this pipeline covers:
+Concrete proof the normalizer misses AL: for `X_0(30)` (= Borel mod 30) the
+`GL2(ℤ/30)`-normalizer gives `|N(H)/H| = 1` — `harvest.m` Part A finds **zero**
+quotients of `X_0(30)`, even though its Atkin–Lehner group is `(ℤ/2)^3`.
 
-1. **Non-modular automorphisms of census curves.** A quotient `X_H/B` by extra
-   automorphisms need not be a modular curve `X_{B'}`, so it escapes the census
-   and its genus can be new. Requires `AutomorphismGroup` on an explicit model
-   of each `X_H` (the README's "second, larger pass") — expensive.
-2. **`X_0(N)` with `N > 1200`** whose `J_0(N)` is completely decomposable
-   (extend Yamauchi's good-level list), then their AL quotients.
-3. **Intermediate curves strictly between `Γ_1(N)` and `Γ_0(N)`** for good `N`
-   (level can be ≥ 240, so not in the census, and not `X_0(N)`): genuinely new
-   sources with AL + diamond quotient genera worth scanning.
+## 5. Remark 2, done correctly: Atkin–Lehner CD-quotients (`harvestC.m`)
 
-All conclusions assume the realized-genus set encoded in
-`KnownRealizedGenera()` (smallest gap = 56) is correct; the negative result is
-relative to that set.
+Remark 2 has two ideas. We implemented the tractable one over `ℚ`:
+
+> take an `X_0(N)` (which need NOT be completely decomposable — "nearly CD"),
+> quotient by an Atkin–Lehner subgroup `U`, and keep it if the quotient
+> Jacobian *is* completely decomposable (its `U`-invariant part contains only
+> rational/elliptic newform orbits). This is the genus-47 mechanism generalized
+> to non-CD sources.
+
+`harvestC.m` computes, for `X_0(N)` and **every** AL subgroup `U`:
+`genus = dim(U-invariant cusp forms)` and `CD? = (no degree>1 newform orbit is
+U-invariant)`. It reproduces both anchors: `g(X_0(600)/w_24)=47` (CD) and
+`g(X_0(43)/w_43)=1` (CD).
+
+Scans (all composite levels with `g(X_0(N)) ≥ 56`):
+
+```
+N ∈ [400,1500] : CD AL-quotient genera ≥56 = {57,61,65,73,77,81,97,103,129}
+N ∈ [1500,2400]: adds {76,79,157}   (source genus up to ~370)
+NEW gap genera in either range: NONE.   Every genus found is already realized.
+```
+
+So the over-`ℚ`, trivial-character branch of Remark 2 — *including* non-CD
+sources whose quotients become CD — yields **no new Ekedahl–Serre genus**
+through `N ≈ 2400`.
+
+## 6. Why the diamond curves / general `X_H` AL-quotients are the hard "second pass"
+
+Both natural extensions hit the same wall:
+
+- **Quotients of the census `X_H` themselves (general `H` from `grpdata.txt`).**
+  The `GL2(Ẑ)`-internal quotients are provably already realized (§2). The
+  promising ones are again **Atkin–Lehner**, but for a *general* `H` there is no
+  off-the-shelf `ModularSymbols(Γ_H)` + `AtkinLehner` in Magma — it needs an
+  explicit model + `AutomorphismGroup`, or a hand-built realization of
+  `S_2(Γ_H)` inside `S_2(Γ(N))` with the Fricke operator. `X_0(N)` was used as
+  the tractable proxy that exhibits the identical mechanism.
+- **Intermediate diamond curves `X_Δ(N)`** (`Γ_1 ⊆ Γ_H ⊆ Γ_0`). These DO carry
+  extra content vs `X_0(N)` (non-trivial-character newforms). But: (i) on the
+  character/diamond Jacobian, `AtkinLehnerOperator` is only defined over
+  `ℚ(ζ_N)` (verified: it errors over `ℚ`), while "completely decomposable" is a
+  statement over `ℚ`; and (ii) a naive "degree-1 newform = elliptic" test is
+  WRONG for character spaces — those degree-1-over-`ℚ(χ)` forms have
+  non-rational `q`-coefficients (verified) and are dimension `≥2` over `ℚ`. A
+  correct CD-check must detect elliptic-over-`ℚ` factors including the
+  **CM / `ℚ`-curve** character newforms (the RSZB cases the census's `cmfdata`
+  files use) — i.e. Frobenius-trace matching, not a degree count.
+
+`Decomposition` of `JOne(N)` does cleanly expose elliptic vs higher-dim factors
+(e.g. `J_1(33)` → dims `[1,1,1,8,4,4,2]`), so a `ModularAbelianVariety`-based
+pipeline (diamond Jacobian → AL quotient → `Decomposition` → flag CD iff every
+factor is elliptic/`ℚ`) is the right tool — but doing AL over the correct field
+and the CM-aware over-`ℚ` test is a genuine build, exactly the pass the paper's
+authors say they "have not attempted."
+
+## 7. Bottom line (updated)
+
+- `GL2(Ẑ)`-internal quotients of census curves: **provably already realized**
+  (§2) — Part A as written is empty *for the right reason*, but only for these.
+- Atkin–Lehner CD-quotients of `X_0(N)`, `N ≤ 2400`, including nearly-CD
+  sources (the genus-47 mechanism): computed, **0 new genera**.
+- Atkin–Lehner CD-quotients of the general census `X_H` and of the diamond
+  curves `X_Δ(N)`: **not yet computed** — the real "second pass" (explicit
+  models / character-aware AL over `ℚ` + CM-aware CD-check). This is the open
+  next step.
+
+All conclusions assume the realized-genus set `KnownRealizedGenera()`
+(smallest gap = 56) is correct.
 
 ## Reproduce
 
@@ -123,10 +185,11 @@ git clone --recurse-submodules \
   https://github.com/AndrewVSutherland/CompletelyDecomposableModularJacobians
 cd CompletelyDecomposableModularJacobians
 git -C Magma fetch --depth 50 origin main && git -C Magma checkout 71a8fdd
-cp ../harvest.m ../harvestB.m .
+cp ../harvest.m ../harvestB.m ../harvestC.m .
 magma -b
 > AttachSpec("spec");
-> load "harvest.m";  CheckAnchor();                         // 47
-> HarvestX0AtkinLehner("x0_al_newgenera.txt");              // 0
-> load "harvestB.m";                                        // 0 (all AL subgroups)
+> load "harvest.m";  CheckAnchor();                          // 47
+> HarvestX0AtkinLehner("x0_al_newgenera.txt");               // 0 (single involutions)
+> load "harvestB.m";                                         // 0 (all AL subgroups, good levels)
+> load "harvestC.m";  ScanX0(400,1500,"scanC.txt");          // 0 new gaps (CD AL quotients of X_0(N))
 ```
