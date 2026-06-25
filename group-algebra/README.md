@@ -4,7 +4,7 @@ Magma scripts applying the **non-modular group-action method** to the search for
 genus-56 curve with completely decomposable Jacobian. This complements the
 modular / Atkin–Lehner quotient work in the repo root (`harvest*.m`, `SUMMARY.md`).
 
-Full write-up: [`../Secondrun-genus56-summary.md`](../Secondrun-genus56-summary.md).
+Full write-up: [`../Summary-third-run-claude.md`](../Summary-third-run-claude.md).
 
 **Result: no genus-56 example found by any of these searches, but every engine
 reproduces published Ekedahl–Serre / Paulhus–Rojas examples** (A₄→g4, PGL(2,7)→g36,
