@@ -2,7 +2,7 @@
 
 Magma scripts applying the **non-modular group-action method** to the search for a
 genus-56 curve with completely decomposable Jacobian. This complements the
-modular / Atkin–Lehner quotient work in the repo root (`harvest*.m`, `SUMMARY.md`).
+modular / Atkin–Lehner quotient work in the repo root (`harvest*.m`, `Summary-auto-quotient-method-claude.md`).
 
 Full write-up: [`../group-algebra/Summary-third-run-claude.md`](../group-algebra/Summary-third-run-claude.md).
 
